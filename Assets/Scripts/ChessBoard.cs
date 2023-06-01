@@ -55,6 +55,7 @@ public class ChessBoard : MonoBehaviour
             // If we were already hovering a tile
             if(currentHover != hitPosition)
             {
+                
                 tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
                 currentHover = hitPosition;
                 tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
@@ -81,7 +82,11 @@ public class ChessBoard : MonoBehaviour
                 bool validMove = MoveTo(curentlyDragging, hitPosition.x,hitPosition.y);
                 if(!validMove)
                 {
-                    curentlyDragging.transform.position = GetTileCenter(previousPosition.x, previousPosition.y);
+                    curentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
+                    curentlyDragging = null;
+                }
+                else
+                {
                     curentlyDragging = null;
                 }
             }
@@ -93,6 +98,12 @@ public class ChessBoard : MonoBehaviour
             {
                 tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
                 currentHover = -Vector2Int.one;
+            }
+
+            if(curentlyDragging && Input.GetMouseButtonUp(0))
+            {
+                curentlyDragging.SetPosition(GetTileCenter(curentlyDragging.currentX, curentlyDragging.currentY));
+                curentlyDragging = null;
             }
         }
     }
@@ -194,7 +205,7 @@ public class ChessBoard : MonoBehaviour
     {
         chessPieces[x,y].currentX = x;
         chessPieces[x,y].currentY = y;
-        chessPieces[x,y].transform.position = GetTileCenter(x,y);
+        chessPieces[x,y].SetPosition(GetTileCenter(x,y), force);
     }
 
     private Vector3 GetTileCenter(int x, int y)
@@ -206,6 +217,17 @@ public class ChessBoard : MonoBehaviour
     private bool MoveTo(ChessPiece cp, int x, int y)
     {
         Vector2Int previousPosition = new Vector2Int(cp.currentX, cp.currentY);
+
+        //Is there another piece on target position
+        if(chessPieces[x,y] != null)
+        {
+            ChessPiece ocp = chessPieces[x,y];
+
+            if(cp.team == ocp.team)
+            {
+                return false;
+            }
+        }
 
         chessPieces[x,y] = cp;
         chessPieces[previousPosition.x, previousPosition.y] = null;
