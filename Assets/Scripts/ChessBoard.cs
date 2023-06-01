@@ -9,6 +9,8 @@ public class ChessBoard : MonoBehaviour
     [SerializeField] private float tileSize = 1.0f;
     [SerializeField] private float yOffset = 0.5f;
     [SerializeField] private Vector3 boardCenter = Vector3.zero;
+    [SerializeField] private float deathSize = 0.5f;
+    [SerializeField] private float deathSpacing = 0.5f;
 
     [Header("Prefabs & Materials")]
     [SerializeField] private GameObject[] prefabs;
@@ -16,7 +18,9 @@ public class ChessBoard : MonoBehaviour
 
     //LOGIC
     private ChessPiece[,] chessPieces;
-    private ChessPiece curentlyDragging;
+    private ChessPiece currentlyDragging;
+    private List<ChessPiece> deadWhites = new List<ChessPiece>();
+    private List<ChessPiece> deadBlacks = new List<ChessPiece>();
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
     private GameObject[,] tiles;
@@ -40,7 +44,7 @@ public class ChessBoard : MonoBehaviour
 
         RaycastHit info;
         Ray ray = currentCamera.ScreenPointToRay(Input.mousePosition);
-        if(Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile")))
+        if(Physics.Raycast(ray, out info, 1000, LayerMask.GetMask("Tile")))
         {
             //Get the indexes of the tile i've hit
             Vector2Int hitPosition = LookupTileIndex(info.transform.gameObject);
@@ -69,25 +73,25 @@ public class ChessBoard : MonoBehaviour
                     //Is it our turn?
                     if(true)
                     {
-                        curentlyDragging = chessPieces[hitPosition.x,hitPosition.y];
+                        currentlyDragging = chessPieces[hitPosition.x,hitPosition.y];
                     }
                 }
             }
 
             //If we are releasing the mouse button
-            if(curentlyDragging != null && Input.GetMouseButtonUp(0))
+            if(currentlyDragging != null && Input.GetMouseButtonUp(0))
             {
-                Vector2Int previousPosition = new Vector2Int(curentlyDragging.currentX, curentlyDragging.currentY);
+                Vector2Int previousPosition = new Vector2Int(currentlyDragging.currentX, currentlyDragging.currentY);
 
-                bool validMove = MoveTo(curentlyDragging, hitPosition.x,hitPosition.y);
+                bool validMove = MoveTo(currentlyDragging, hitPosition.x,hitPosition.y);
                 if(!validMove)
                 {
-                    curentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
-                    curentlyDragging = null;
+                    currentlyDragging.SetPosition(GetTileCenter(previousPosition.x, previousPosition.y));
+                    currentlyDragging = null;
                 }
                 else
                 {
-                    curentlyDragging = null;
+                    currentlyDragging = null;
                 }
             }
 
@@ -100,10 +104,10 @@ public class ChessBoard : MonoBehaviour
                 currentHover = -Vector2Int.one;
             }
 
-            if(curentlyDragging && Input.GetMouseButtonUp(0))
+            if(currentlyDragging && Input.GetMouseButtonUp(0))
             {
-                curentlyDragging.SetPosition(GetTileCenter(curentlyDragging.currentX, curentlyDragging.currentY));
-                curentlyDragging = null;
+                currentlyDragging.SetPosition(GetTileCenter(currentlyDragging.currentX, currentlyDragging.currentY));
+                currentlyDragging = null;
             }
         }
     }
@@ -226,6 +230,26 @@ public class ChessBoard : MonoBehaviour
             if(cp.team == ocp.team)
             {
                 return false;
+            }
+
+            //If its the enemy team
+            if(ocp.team == 0)
+            {
+                deadWhites.Add(ocp);
+                ocp.setScale(Vector3.one * deathSize);
+                ocp.SetPosition(new Vector3(8 * tileSize, yOffset, -1*tileSize) 
+                - bounds 
+                + new Vector3(tileSize/2, 0, tileSize/2) 
+                + (Vector3.forward * deathSpacing) * deadWhites.Count);
+            }
+            else
+            {
+                deadBlacks.Add(ocp);
+                ocp.setScale(Vector3.one * deathSize);
+                ocp.SetPosition(new Vector3(-1 * tileSize, yOffset, 8*tileSize) 
+                - bounds 
+                + new Vector3(tileSize/2, 0, tileSize/2) 
+                + (Vector3.back * deathSpacing) * deadBlacks.Count);
             }
         }
 
