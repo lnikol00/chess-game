@@ -2,4 +2,5 @@
 
 # CHESS GAME
 
-Fun 3D chess game built with Unity and C#
+Fun 3D chess game built with Unity and C# programing lanugage. Game is designed for 2 players and include all special chess moves such as En Passant, Castling and Promotion.
+
