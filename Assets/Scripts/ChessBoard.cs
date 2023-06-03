@@ -6,7 +6,7 @@ public enum SpecialMove
 {
     None = 0,
     EnPassant,
-    Castlinig,
+    Castling,
     Promotion
 }
 
@@ -19,7 +19,7 @@ public class ChessBoard : MonoBehaviour
     [SerializeField] private Vector3 boardCenter = Vector3.zero;
     [SerializeField] private float deathSize = 0.5f;
     [SerializeField] private float deathSpacing = 0.5f;
-    [SerializeField] private float dragOffset = 0f;
+    [SerializeField] private float dragOffset = 0.5f;
     [SerializeField] private GameObject victoryScreen;
 
     [Header("Prefabs & Materials")]
@@ -249,18 +249,13 @@ public class ChessBoard : MonoBehaviour
     private void HiglightTiles()
     {
         for (int i = 0; i < availableMoves.Count; i++)
-        {
             tiles[availableMoves[i].x, availableMoves[i].y]. layer = LayerMask.NameToLayer("Highlight");
-        }
     }
     private void RemoveHiglightTiles()
     {
         for (int i = 0; i < availableMoves.Count; i++)
-        {
             tiles[availableMoves[i].x, availableMoves[i].y]. layer = LayerMask.NameToLayer("Tile");
-
-            availableMoves.Clear();
-        }
+        availableMoves.Clear();
     }
 
     //Checkmate
@@ -350,6 +345,75 @@ public class ChessBoard : MonoBehaviour
                             + (Vector3.back * deathSpacing) * deadBlacks.Count);
                     }
                     chessPieces[enemyPawn.currentX, enemyPawn.currentY] = null;
+                }
+            }
+        }
+
+        if(specialMove == SpecialMove.Castling)
+        {
+            var lastMove = moveList[moveList.Count - 1];
+
+            // Left rook
+            if(lastMove[1].x == 2)
+            {
+                if(lastMove[1].y == 0) //White side
+                {
+                    ChessPiece rook = chessPieces[0,0];
+                    chessPieces[3,0] = rook;
+                    PositionSinglePiece(3,0);
+                    chessPieces[0,0] = null;
+                }
+                else if(lastMove[1].y == 7) //Black side
+                {
+                    ChessPiece rook = chessPieces[0,7];
+                    chessPieces[3,7] = rook;
+                    PositionSinglePiece(3,7);
+                    chessPieces[0,7] = null;
+                }
+            }
+
+            //Right Rook
+            else if(lastMove[1].x == 6)
+            {
+                if(lastMove[1].y == 0) //White side
+                {
+                    ChessPiece rook = chessPieces[7,0];
+                    chessPieces[5,0] = rook;
+                    PositionSinglePiece(5,0);
+                    chessPieces[7,0] = null;
+                }
+                else if(lastMove[1].y == 7) //Black side
+                {
+                    ChessPiece rook = chessPieces[7,7];
+                    chessPieces[5,7] = rook;
+                    PositionSinglePiece(5,7);
+                    chessPieces[7,7] = null;
+                }
+            }
+        }
+
+        if(specialMove == SpecialMove.Promotion)
+        {
+            Vector2Int[] lastMove = moveList[moveList.Count - 1];
+            ChessPiece targetPawn = chessPieces[lastMove[1].x, lastMove[1].y];
+
+            if(targetPawn.type == ChessPieceType.Pawn)
+            {
+                if(targetPawn.team == 0 && lastMove[1].y == 7)
+                {
+                    ChessPiece newQueen = SpawnSinglePiece(ChessPieceType.Queen, 0);
+                    newQueen.transform.position = chessPieces[lastMove[1].x, lastMove[1].y].transform.position;
+                    Destroy(chessPieces[lastMove[1].x, lastMove[1].y].gameObject);
+                    chessPieces[lastMove[1].x, lastMove[1].y] = newQueen;
+                    PositionSinglePiece(lastMove[1].x, lastMove[1].y);
+                }
+                if(targetPawn.team == 1 && lastMove[1].y == 0)
+                {
+                    ChessPiece newQueen = SpawnSinglePiece(ChessPieceType.Queen, 1);
+                    newQueen.transform.position = chessPieces[lastMove[1].x, lastMove[1].y].transform.position;
+                    Destroy(chessPieces[lastMove[1].x, lastMove[1].y].gameObject);
+                    chessPieces[lastMove[1].x, lastMove[1].y] = newQueen;
+                    PositionSinglePiece(lastMove[1].x, lastMove[1].y);
                 }
             }
         }
