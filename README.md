@@ -1,6 +1,5 @@
-![image](https://github.com/lnikol00/chess-game/assets/122328343/7592e18b-a592-46d5-ada4-e1b1a0dafd8c)
 
-![chess-game](https://github.com/lnikol00/chess-game/assets/122328343/406d0de5-e8f0-4834-a7a6-5cd6b639ce65)
+![chess-game](https://github.com/lnikol00/chess-game/assets/122328343/00d8777a-47fd-45ec-a3bc-15d79a5b5edf)
 
 # CHESS GAME
 Fun 3D chess game built with Unity and C#
