@@ -96,9 +96,14 @@ public class ChessBoard : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             StartCoroutine(SwapCamera());
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            victoryScreen.SetActive(true);
         }
 
         RaycastHit info;
@@ -357,6 +362,13 @@ public class ChessBoard : MonoBehaviour
 
     public void OnExitButton()
     {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+
+#endif
+
+
         Application.Quit();
     }
 
